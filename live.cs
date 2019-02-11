@@ -1,0 +1,121 @@
+function fxDTSBrick::sendLSUpdate(%this, %what, %rVal) {
+	if(%this._LS_uniq $= "" || !isObject(%this) || %this == %this.client.player.tempbrick || %this.isACTUALLYPlanted $= "") {
+		return;
+	}
+
+	switch$(%what) {
+		case "color":
+			%attr = "colorID";
+			%val = %this.getColorID();
+
+		case "item" or "emitter" or "light" or "vehicle" or "music":
+			%attr = %what;
+			%val = (isObject(%rVal) ? %rVal.getName() : "");
+
+		case "emitterDir" or "itemDir" or "itemPos" or "itemTime" or "colorVehicle" or "attr" or "name":
+			%attr = %what;
+			%val = %rVal;
+	}
+
+	if(%attr $= "") {
+		return;
+	}
+
+	%data = "brickUpdate" TAB %this._LS_uniq TAB %attr TAB %val;
+
+	%list = LiveSaverTCPLines;
+	%next = %list.getRowText(%list.rowCount()-1);
+
+	if(getField(%data, 0) $= getField(%next, 0) && getField(%data, 1) $= getField(%next, 1) && getField(%data, 2) $= getField(%next, 2)) {
+		%list.removeRow(%list.rowCount()-1);
+	}
+
+	%list.send(%data);
+}
+
+package LSLivePackage {
+	function fxDTSBrickData::onColorChange(%db, %brick) {
+		%brick.sendLSUpdate("color");
+		return parent::onColorChange(%db, %brick);
+	}
+
+	function fxDTSBrick::setLight(%this, %light, %client) {
+		%this.sendLSUpdate("light", %light);
+		return parent::setLight(%this, %light, %client);
+	}
+
+	function fxDTSBrick::setEmitter(%this, %emitter, %client) {
+		%this.sendLSUpdate("emitter", %emitter);
+		return parent::setEmitter(%this, %emitter, %client);
+	}
+
+	function fxDTSBrick::setEmitterDirection(%this, %dir) {
+		%this.sendLSUpdate("emitterDir", %dir);
+		return parent::setEmitterDirection(%this, %dir);
+	}
+
+	function fxDTSBrick::setItem(%this, %item, %client) {
+		%this.sendLSUpdate("item", %item);
+		return parent::setItem(%this, %item, %client);
+	}
+
+	function fxDTSBrick::setItemPosition(%this, %pos) {
+		%this.sendLSUpdate("itemPos", %pos);
+		return parent::setItemPosition(%this, %pos);
+	}
+
+	function fxDTSBrick::setItemDirection(%this, %dir) {
+		%this.sendLSUpdate("itemDir", %dir);
+		return parent::setItemDirection(%this, %dir);
+	}
+
+	function fxDTSBrick::setItemRespawnTime(%this, %msec) {
+		%this.sendLSUpdate("itemTime", %msec);
+		return parent::setItemRespawnTime(%this, %msec);
+	}
+
+	function fxDTSBrick::setRendering(%this, %a) {
+		%this.sendLSUpdate("attr", %this.isRaycasting() SPC %this.isColliding() SPC %a);
+		parent::setRendering(%this, %a);
+	}
+
+	function fxDTSBrick::setColliding(%this, %a) {
+		%this.sendLSUpdate("attr", %this.isRaycasting() SPC %a SPC %this.isRendering());
+		parent::setColliding(%this, %a);
+	}
+
+	function fxDTSBrick::setRaycasting(%this, %a) {
+		%this.sendLSUpdate("attr", %a SPC %this.isColliding() SPC %this.isRendering());
+		parent::setRaycasting(%this, %a);
+	}
+
+	function SimObject::setNTObjectName(%this, %name) {
+		if(%this._LS_uniq $= "" || %name $= "") {
+			return parent::setNTObjectName(%this, %name);
+		}
+
+		%sName = %name;
+		if(getSubStr(%sName, 0, 1) !$= "_") {
+			%sName = "_" @ %name;
+		}
+		%this.sendLSUpdate("name", %sName);
+
+		return parent::setNTObjectName(%this, %name);
+	}
+
+	function fxDTSBrick::setReColorVehicle(%this, %a) {
+		%this.sendLSUpdate("colorVehicle", %a);
+		parent::setReColorVehicle(%this, %a);
+	}
+
+	function fxDTSBrick::setVehicle(%this, %db, %client) {
+		%this.sendLSUpdate("vehicle", %db.getName());
+		parent::setVehicle(%this, %db, %client);
+	}
+
+	function fxDTSBrick::setSound(%this, %db, %client) {
+		%this.sendLSUpdate("music", %db.getName());
+		parent::setSound(%this, %db, %client);		
+	}
+};
+activatePackage(LSLivePackage);
