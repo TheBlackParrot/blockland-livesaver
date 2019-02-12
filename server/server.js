@@ -339,7 +339,6 @@ function exportBLLS(socket) {
 		let dbGroup = group[brick.dataBlock];
 
 		let data = [
-			uniq,
 			b[uniq].name,
 			b[uniq].angleID,
 			b[uniq].colorFxID,
@@ -517,15 +516,17 @@ net.createServer(function(socket) {
 	socket.write("OK\r\n");
 
 	socket.on("data", function(data) {
-		var parts = data.toString().split("\t").map(function(part) {
-			return part.trim();
-		});
+		let lines = data.toString().split("\n").map(x => x.trim());
+		for(let idx in lines) {
+			let line = lines[idx].toString().trim();
 
-		if(!(data.toString().trim())) {
-			return;
+			if(!line) {
+				return;
+			}
+
+			var parts = line.split("\t").map(x => x.trim());
+			handle(socket, parts);
 		}
-
-		handle(socket, parts);
 	});
 
 	socket.on("error", function(err) {
