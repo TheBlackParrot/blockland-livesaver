@@ -22,33 +22,10 @@ function fxDTSBrick::sendLSUpdate(%this, %what, %rVal) {
 		return;
 	}
 
-	cancel(%this.updateDelay[%attr]);
-
 	%data = "brickUpdate" TAB %this._LS_uniq TAB %attr TAB %val;
+
+	cancel(%this.updateDelay[%attr]);
 	%this.updateDelay[%attr] = %this.schedule(5000, pushLSUpdate, %data);
-}
-
-function fxDTSBrick::sendLSEventUpdate(%brick) {
-	if(%brick.numEvents > 0) {
-		for(%idx = 0; %idx < %brick.numEvents; %idx++) {
-			cancel(%brick.updateDelay["event", %idx]);
-
-			%params = getFields(%brick.serializeEventToString(%idx), 7, 10);
-
-			%data = "brickEvent" TAB
-			%brick._LS_uniq TAB
-			%idx TAB
-			%brick.eventEnabled[%idx] TAB
-			%brick.eventInput[%idx] TAB
-			%brick.eventDelay[%idx] TAB
-			%brick.eventTarget[%idx] TAB
-			%brick.eventNT[%idx] TAB
-			%brick.eventOutput[%idx] TAB
-			%params;
-
-			%brick.updateDelay["event", %idx] = %brick.schedule(5000, pushLSUpdate, %data);
-		}
-	}
 }
 
 // would love lambda functions here but toreque enging
@@ -139,21 +116,6 @@ package LSLivePackage {
 	function fxDTSBrick::setSound(%this, %db, %client) {
 		%this.sendLSUpdate("music", %db.getName());
 		parent::setSound(%this, %db, %client);		
-	}
-
-	function serverCmdAddEvent(%client, %enabled, %inputEventIdx, %delay, %targetIdx, %NTNameIdx, %outputEventIdx, %par1, %par2, %par3, %par4) {
-		%a = parent::serverCmdAddEvent(%client, %enabled, %inputEventIdx, %delay, %targetIdx, %NTNameIdx, %outputEventIdx, %par1, %par2, %par3, %par4);
-		// need some way to prevent spam
-		%client.wrenchBrick.sendLSEventUpdate();
-		return %a;
-	}
-
-	function SimObject::clearEvents(%this) {
-		parent::clearEvents(%this);
-		if(%this.getClassName() $= "fxDTSBrick") {
-			cancel(%this.updateDelay["eventClear"]);
-			%this.updateDelay["eventClear"] = %this.schedule(5000, pushLSUpdate, "eventClear" TAB %this._LS_uniq);
-		}
 	}
 };
 activatePackage(LSLivePackage);

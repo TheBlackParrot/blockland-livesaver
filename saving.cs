@@ -113,7 +113,7 @@ package LiveSaverPackage {
 		}
 		$Server::LiveSaver[%brick._LS_uniq] = %brick;
 
-		%brick.schedule(1, _LS_sendBrickToSave);
+		%brick.schedule(5000, _LS_sendBrickToSave);
 
 		return %a;
 	}

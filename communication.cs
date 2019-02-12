@@ -36,12 +36,12 @@ function LiveSaverTCPLines::checkToSend(%this) {
 	}
 
 	LiveSaverTCPObject.send(%data @ "\r\n");
-	echo("\c5[SENT]\c0" SPC %data);
+	//echo("\c5[SENT]\c0" SPC %data);
 }
 
 function LiveSaverTCPObject::onLine(%this, %line) {
 	%line = trim(%line);
-	echo("\c4[RECV]\c0" SPC %line);
+	//echo("\c4[RECV]\c0" SPC %line);
 	
 	// if you host this to the outside world (WHICH YOU HAVE TO RECONFIGURE TO MAKE HAPPEN), don't come complaining to me when your server inevitably crashes.
 	// i am WELL AWARE of the security risks here, leave it on 127.0.0.1 and stick to trying to crash yourself thanks
