@@ -12,23 +12,41 @@ function swap(json){
 }
 
 var bricks = {};
+var colors = {};
 
 var funcs = {
 	"connect": function(socket, parts) {
-		// connect
-		teams = {};
 		return "HELLO";
 	},
 
 	"serverPort": function(socket, parts) {
 		socket.BLPort = parseInt(parts[1]);
 
-		socket.write("okToLoad\r\n");
+		//socket.write("okToLoad\r\n");
 
 		if(!bricks.hasOwnProperty(socket.BLPort)) {
 			bricks[socket.BLPort] = {};
 			console.log(`created vault for Blockland server port ${socket.BLPort}`);
 		}
+
+		fs.readdir("./saves", function(err, files) {
+			let highest = 0;
+			let highestFile = "";
+
+			for(let idx in files) {
+				let fparts = files[idx].split("-");
+
+				let timestamp = parseInt(fparts[0]);
+				let port = fparts[1];
+
+				if(timestamp > highest) {
+					highest = timestamp;
+					highestFile = files[idx];
+				}
+			}
+
+			loadBLLS(socket, `./saves/${highestFile}`);
+		});
 	},
 
 	"brick": function(socket, parts) {
@@ -194,25 +212,32 @@ var funcs = {
 		delete b[uniq];
 	},
 
+	"colorsetLength": function(socket, parts) {
+		if(!colors.hasOwnProperty(socket.BLPort)) {
+			colors[socket.BLPort] = {};
+			console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+		}
+
+		let c = colors[socket.BLPort];
+		for(let idx in c) {
+			delete c[idx];
+		}
+	},
+
+	"colorset": function(socket, parts) {
+		var c = colors[socket.BLPort];
+		c[parts[1]] = parts[2];
+	},
+
 	"save": function(socket, parts) {
 		if(!fs.existsSync("./saves")) {
 			fs.mkdirSync("./saves");
 		}
 		fs.writeFileSync(`./saves/${Date.now()}-${socket.BLPort}.json`, JSON.stringify(bricks[socket.BLPort]), "utf8");
+
+		exportBLLS(socket);
 	}
 };
-/*
-				"brickEvent" TAB
-				%brick._LS_uniq TAB
-				%idx TAB
-				%brick.eventEnabled[%idx] TAB
-				%brick.eventInput[%idx] TAB
-				%brick.eventDelay[%idx] TAB
-				%brick.eventTarget[%idx] TAB
-				%brick.eventNT[%idx] TAB
-				%brick.eventOutput[%idx] TAB
-				%params
-*/
 
 function sendBrick(socket, uniq) {
 	var b = bricks[socket.BLPort];
@@ -222,7 +247,23 @@ function sendBrick(socket, uniq) {
 		return;
 	}
 
-	socket.write(`brick\t${uniq}\t` + Object.values(b[uniq]).slice(0, 14).join("\t") + "\r\n");
+	let parts = [
+		uniq,
+		b[uniq].name,
+		b[uniq].owner,
+		b[uniq].angleID,
+		b[uniq].colorFxID,
+		b[uniq].shapeFxID,
+		b[uniq].colorID,
+		b[uniq].dataBlock,
+		b[uniq].position,
+		b[uniq].rotation,
+		b[uniq].print,
+		b[uniq].light,
+		b[uniq].music,
+		b[uniq].attr,		
+	];
+	socket.write(`brick\t${parts.join("\t")}\r\n`);
 
 	if(b[uniq].hasOwnProperty("emitter")) {
 		socket.write(`brickEmitter\t${uniq}\t${b[uniq].emitter}\t${b[uniq].emitterDir}\r\n`);
@@ -242,6 +283,199 @@ function sendBrick(socket, uniq) {
 		}
 	}
 }
+
+function exportBLS(socket) {
+	// wip
+	if(!bricks.hasOwnProperty(socket.BLPort)) {
+		return;
+	}
+	if(!colors.hasOwnProperty(socket.BLPort)) {
+		return;
+	}
+
+	let c = colors[socket.BLPort];
+	let b = bricks[socket.BLPort];
+	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}.bls`);
+
+	stream.write(`This is a Blockland save file.  You probably shouldn't modify it cause you'll screw it up.\r\n1\r\nLiveSaver autosave from server port ${socket.BLPort} ts ${Date.now()}`);
+
+	for(let idx in c) {
+		stream.write(`${c[idx]}\r\n`);
+	}
+
+	stream.write(`Linecount ${Object.keys(b).length}\r\n`);
+}
+
+function exportBLLS(socket) {
+	if(!bricks.hasOwnProperty(socket.BLPort)) {
+		return;
+	}
+	if(!colors.hasOwnProperty(socket.BLPort)) {
+		return;
+	}
+
+	let c = colors[socket.BLPort];
+	let b = bricks[socket.BLPort];
+	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}.blls`);
+
+	for(let idx in c) {
+		stream.write(`${c[idx]}\r\n`);
+	}
+
+	let owners = {};
+
+	let skipIdx = [1, 6];
+	for(let uniq in b) {
+		let brick = b[uniq];
+		
+		if(!owners.hasOwnProperty(brick.owner)) {
+			owners[brick.owner] = {};
+		}
+		let group = owners[brick.owner];
+
+		if(!group.hasOwnProperty(brick.dataBlock)) {
+			group[brick.dataBlock] = [];
+		}
+		let dbGroup = group[brick.dataBlock];
+
+		let data = [
+			uniq,
+			b[uniq].name,
+			b[uniq].angleID,
+			b[uniq].colorFxID,
+			b[uniq].shapeFxID,
+			b[uniq].colorID,
+			b[uniq].position,
+			b[uniq].rotation,
+			b[uniq].print,
+			b[uniq].light,
+			b[uniq].music,
+			b[uniq].attr,		
+		];
+
+		dbGroup[uniq] = data;
+	}
+
+	for(let owner in owners) {
+		stream.write(`OWN\t${owner}\r\n`);
+		let group = owners[owner];
+		for(let db in group) {
+			let dbGroup = group[db];
+			stream.write(`DB\t${db}\r\n`);
+			for(let uniq in dbGroup) {
+				let data = dbGroup[uniq];
+				stream.write(`${uniq}\t${data.join("\t")}\r\n`);
+
+				if(b[uniq].hasOwnProperty("emitter")) {
+					stream.write(`M\t${b[uniq].emitter}\t${b[uniq].emitterDir}\r\n`);
+				}
+				if(b[uniq].hasOwnProperty("item")) {
+					stream.write(`I\t${b[uniq].item}\t${b[uniq].itemDir}\t${b[uniq].itemPos}\t${b[uniq].itemTime}\r\n`);
+				}
+				if(b[uniq].hasOwnProperty("vehicle")) {
+					stream.write(`V\t${b[uniq].vehicle}\t${b[uniq].colorVehicle}\r\n`);
+				}
+				if(b[uniq].hasOwnProperty("events")) {
+					for(let idx in b[uniq].events) {
+						let e = b[uniq].events[idx];
+						let ev = Object.values(e);
+
+						stream.write(`E\t${idx}\t${ev.slice(0, 6).join("\t")}\t${(e.params.length > 0 ? e.params.join("\t") : "")}\r\n`);
+					}
+				}
+			}
+		}
+	}
+
+	stream.end();
+}
+
+function loadBLLS(socket, file) {
+	if(!bricks.hasOwnProperty(socket.BLPort)) {
+		bricks[socket.BLPort] = {};
+		console.log(`created vault for Blockland server port ${socket.BLPort}`);
+	}
+
+	if(!colors.hasOwnProperty(socket.BLPort)) {
+		colors[socket.BLPort] = {};
+		console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+	}
+
+	let c = colors[socket.BLPort];
+	let b = bricks[socket.BLPort];
+
+	fs.readFile(file, "utf8", function(err, data) {
+		if(err) {
+			throw err;
+		}
+		let lines = data.split("\n").map(x => x.trim());
+
+		let startedBricks = false;
+		let owner = -1;
+		let db = -1;
+		let uniq = -1;
+
+		for(let idx in lines) {
+			let line = lines[idx];
+			if(!line) {
+				continue;
+			}
+			let parts = line.split("\t");
+
+			switch(parts[0]) {
+				case "OWN":
+					owner = parts[1];
+					startedBricks = true;
+					break;
+
+				case "DB":
+					db = parts[1];
+					break;
+
+				case "M":
+					parts.splice(1, 0, uniq);
+					funcs["brickEmitter"](socket, parts);
+					break;
+
+				case "I":
+					parts.splice(1, 0, uniq);
+					funcs["brickItem"](socket, parts);
+					break;
+
+				case "V":
+					parts.splice(1, 0, uniq);
+					funcs["brickVehicle"](socket, parts);
+					break;
+
+				case "E":
+					parts.splice(1, 0, uniq);
+					funcs["brickEvent"](socket, parts);
+					break;
+
+				default:
+					if(startedBricks) {
+						uniq = parts[0];
+						parts.splice(0, 0, "brick");
+						parts.splice(3, 0, owner);
+						parts.splice(8, 0, db);
+						console.log(parts);
+						funcs["brick"](socket, parts);
+					} else {
+						c[Object.values(c).length] = line;
+					}
+					break;
+			}
+		}
+	});
+}
+
+function saveOnAllSockets() {
+	for(let idx in TCPClients) {
+		let socket = TCPClients[idx];
+		exportBLLS(socket);
+	}
+}
+setInterval(saveOnAllSockets, settings.saveInterval*60*1000);
 
 function handle(socket, parts) {
 	if(!parts.length) {

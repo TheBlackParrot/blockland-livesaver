@@ -7,3 +7,10 @@ function _LSgetPrintName(%id) {
 	%return = %category @ "/" @ %name;
 	return %return;
 }
+
+function _LSgetColorsetLength() {
+	for(%count = 0; isObject("color" @ %count @ "SprayCanImage"); %count++) {
+		// yeah
+	}
+	return %count || 0;
+}
