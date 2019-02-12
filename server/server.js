@@ -135,6 +135,24 @@ var funcs = {
 		e[idx].params = parts.slice(9);
 	},
 
+	"eventClear": function(socket, parts) {
+		const uniq = parts[1];
+
+		var b = bricks[socket.BLPort];
+
+		if(!b.hasOwnProperty(uniq)) {
+			b[uniq] = {};
+		}
+
+		if(!b[uniq].hasOwnProperty("events")) {
+			b[uniq].events = {};
+		}
+		let e = b[uniq].events;
+		for(let idx in e) {
+			delete e[idx];
+		}
+	},
+
 	"load": function(socket, parts) {
 		var b = bricks[socket.BLPort];
 
