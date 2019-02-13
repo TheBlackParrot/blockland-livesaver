@@ -62,8 +62,7 @@ function _LSRCMD_okToLoad() {
 		for(%i = 0; %i < %colors; %i++) {
 			LiveSaverTCPLines.send("colorset" TAB %i TAB getColorIDTable(%i));
 		}
-
-		LiveSaverTCPLines.send("load");
+		LiveSaverTCPLines.send("colorsetEnd");
 	}
 	$LS::InitLoad = true;
 }
