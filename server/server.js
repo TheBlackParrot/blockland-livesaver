@@ -223,13 +223,15 @@ var funcs = {
 				let timestamp = parseInt(fparts[0]);
 				let port = fparts[1];
 
-				if(timestamp > highest) {
+				if(timestamp > highest && port == socket.BLPort) {
 					highest = timestamp;
 					highestFile = files[idx];
 				}
 			}
 
-			loadBLLS(socket, `./saves/${highestFile}`);
+			if(highestFile) {
+				loadBLLS(socket, `./saves/${highestFile}`);
+			}
 
 			socket.write("okToLoad\r\n");
 		});
