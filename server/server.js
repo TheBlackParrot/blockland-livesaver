@@ -13,6 +13,8 @@ function swap(json){
 
 var bricks = {};
 var colors = {};
+var currentColors = {};
+var colorTranslations = {};
 
 var funcs = {
 	"connect": function(socket, parts) {
@@ -22,31 +24,12 @@ var funcs = {
 	"serverPort": function(socket, parts) {
 		socket.BLPort = parseInt(parts[1]);
 
-		//socket.write("okToLoad\r\n");
-
 		if(!bricks.hasOwnProperty(socket.BLPort)) {
 			bricks[socket.BLPort] = {};
 			console.log(`created vault for Blockland server port ${socket.BLPort}`);
 		}
 
-		fs.readdir("./saves", function(err, files) {
-			let highest = 0;
-			let highestFile = "";
-
-			for(let idx in files) {
-				let fparts = files[idx].split("-");
-
-				let timestamp = parseInt(fparts[0]);
-				let port = fparts[1];
-
-				if(timestamp > highest) {
-					highest = timestamp;
-					highestFile = files[idx];
-				}
-			}
-
-			loadBLLS(socket, `./saves/${highestFile}`);
-		});
+		socket.write("okToLoad\r\n");
 	},
 
 	"brick": function(socket, parts) {
@@ -213,27 +196,48 @@ var funcs = {
 	},
 
 	"colorsetLength": function(socket, parts) {
-		if(!colors.hasOwnProperty(socket.BLPort)) {
-			colors[socket.BLPort] = {};
+		if(!currentColors.hasOwnProperty(socket.BLPort)) {
+			currentColors[socket.BLPort] = {};
 			console.log(`created colorset for Blockland server port ${socket.BLPort}`);
 		}
 
-		let c = colors[socket.BLPort];
+		let c = currentColors[socket.BLPort];
 		for(let idx in c) {
 			delete c[idx];
 		}
 	},
 
 	"colorset": function(socket, parts) {
-		var c = colors[socket.BLPort];
+		var c = currentColors[socket.BLPort];
 		c[parts[1]] = parts[2];
+	},
+
+	"colorsetEnd": function(socket, parts) {
+		fs.readdir("./saves", function(err, files) {
+			let highest = 0;
+			let highestFile = "";
+
+			for(let idx in files) {
+				let fparts = files[idx].split("-");
+
+				let timestamp = parseInt(fparts[0]);
+				let port = fparts[1];
+
+				if(timestamp > highest) {
+					highest = timestamp;
+					highestFile = files[idx];
+				}
+			}
+
+			loadBLLS(socket, `./saves/${highestFile}`);
+		});
 	},
 
 	"save": function(socket, parts) {
 		if(!fs.existsSync("./saves")) {
 			fs.mkdirSync("./saves");
 		}
-		fs.writeFileSync(`./saves/${Date.now()}-${socket.BLPort}.json`, JSON.stringify(bricks[socket.BLPort]), "utf8");
+		//fs.writeFileSync(`./saves/${Date.now()}-${socket.BLPort}.json`, JSON.stringify(bricks[socket.BLPort]), "utf8");
 
 		exportBLLS(socket);
 	}
@@ -284,6 +288,80 @@ function sendBrick(socket, uniq) {
 	}
 }
 
+function emulateCM3(socket) {
+	if(!colors.hasOwnProperty(socket.BLPort)) {
+		colors[socket.BLPort] = {};
+		console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+	}
+
+	if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
+		colorTranslations[socket.BLPort] = {};
+		console.log(`created colorset translation table for Blockland server port ${socket.BLPort}`);
+	} else {
+		for(let z in colorTranslations[socket.BLPort]) {
+			delete colorTranslations[socket.BLPort][z]
+		}		
+	}
+
+	let c = colors[socket.BLPort];
+	let cc = currentColors[socket.BLPort];
+	let ct = colorTranslations[socket.BLPort];
+
+	console.log("c");
+	console.log(Object.values(c).join(", "));
+	console.log("cc");
+	console.log(Object.values(cc).join(", "));
+
+	for(let idx in c) {
+		color = c[idx].split(" ").map(parseFloat);
+
+		red = color[0];
+		green = color[1];
+		blue = color[2];
+		alpha = color[3];
+
+		if(alpha >= 0.0001) {
+			let minDiff = 99999;
+			let matchIdx = -1;
+
+			for(let j in cc) {
+				let checkColor = cc[j].split(" ").map(parseFloat);
+
+				let checkRed = checkColor[0];
+				let checkGreen = checkColor[1];
+				let checkBlue = checkColor[2];
+				let checkAlpha = checkColor[3];
+
+				let diff = 0;
+				diff += Math.abs(Math.abs(checkRed) - Math.abs(red));
+				diff += Math.abs(Math.abs(checkGreen) - Math.abs(green));
+				diff += Math.abs(Math.abs(checkBlue) - Math.abs(blue));
+
+				if(checkAlpha > 0.99 && alpha < 0.99 || (checkAlpha < 0.99 && alpha > 0.99)) {
+					diff += 1000;
+				} else {
+					diff += (Math.abs(Math.abs(checkAlpha) - Math.abs(alpha))) * 0.5;
+				}
+
+				if (diff < minDiff)
+				{
+					minDiff = diff;
+					matchIdx = j;
+				}
+			}
+
+			if(matchIdx == -1) {
+				matchIdx = 0;
+			} else {
+				ct[idx] = matchIdx;
+			}
+		}
+	}
+
+	console.log("ct");
+	console.log(Object.values(ct).join(", "));
+}
+
 function exportBLS(socket) {
 	// wip
 	if(!bricks.hasOwnProperty(socket.BLPort)) {
@@ -310,11 +388,11 @@ function exportBLLS(socket) {
 	if(!bricks.hasOwnProperty(socket.BLPort)) {
 		return;
 	}
-	if(!colors.hasOwnProperty(socket.BLPort)) {
+	if(!currentColors.hasOwnProperty(socket.BLPort)) {
 		return;
 	}
 
-	let c = colors[socket.BLPort];
+	let c = currentColors[socket.BLPort];
 	let b = bricks[socket.BLPort];
 	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}.blls`);
 
@@ -398,10 +476,21 @@ function loadBLLS(socket, file) {
 	if(!colors.hasOwnProperty(socket.BLPort)) {
 		colors[socket.BLPort] = {};
 		console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+	} else {
+		for(let z in colors[socket.BLPort]) {
+			delete colors[socket.BLPort][z]
+		}
+	}
+
+	if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
+		colorTranslations[socket.BLPort] = {};
+		console.log(`created colorset translation table for Blockland server port ${socket.BLPort}`);
 	}
 
 	let c = colors[socket.BLPort];
 	let b = bricks[socket.BLPort];
+	let ct = colorTranslations[socket.BLPort];
+	let cc = currentColors[socket.BLPort];
 
 	fs.readFile(file, "utf8", function(err, data) {
 		if(err) {
@@ -424,6 +513,9 @@ function loadBLLS(socket, file) {
 			switch(parts[0]) {
 				case "OWN":
 					owner = parts[1];
+					if(!startedBricks) {
+						emulateCM3(socket);
+					}
 					startedBricks = true;
 					break;
 
@@ -457,7 +549,7 @@ function loadBLLS(socket, file) {
 						parts.splice(0, 0, "brick");
 						parts.splice(3, 0, owner);
 						parts.splice(8, 0, db);
-						console.log(parts);
+						parts[7] = ct[parts[7]];
 						funcs["brick"](socket, parts);
 					} else {
 						c[Object.values(c).length] = line;
