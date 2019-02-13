@@ -4,11 +4,6 @@ function fxDTSBrick::_LS_sendBrickToSave(%brick) {
 	}
 	$Server::LiveSaver[%brick._LS_uniq] = %brick;
 
-	if(!LiveSaverTCPLines.isSaving) {
-		LiveSaverTCPLines.isSaving = true;
-		LiveSaverTCPLines.send("SAVESTART");
-	}
-
 	LiveSaverTCPLines.send(
 		"brick" TAB
 		%brick._LS_uniq TAB

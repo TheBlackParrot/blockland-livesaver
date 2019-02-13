@@ -1,14 +1,20 @@
 function LiveSaverTCPLines::send(%this, %data) {
-	%next = %this.getRowText(%this.rowCount()-1);
-
-	if(getField(%data, 0) $= getField(%next, 0) && getField(%data, 1) $= getField(%next, 1)
-		&& getField(%data, 0) !$= "brickEvent"
-		&& getField(%data, 0) !$= "brickUpdate")
-	{
-		%this.removeRow(%this.rowCount()-1);
+	%list = %this;
+	if(!$Server::LS::Connected) {
+		%list = LiveSaverTCPToProcess;
 	}
 
-	%this.addRow(getSimTime(), %data);
+	//%next = %list.getRowText(%list.rowCount()-1);
+
+	//if(getField(%data, 0) $= getField(%next, 0) && getField(%data, 1) $= getField(%next, 1)
+	//	&& getField(%data, 0) !$= "brickEvent"
+	//	&& getField(%data, 0) !$= "brickUpdate")
+	//{
+	//	%list.removeRow(%list.rowCount()-1);
+	//}
+
+	%list.addRow(getSimTime(), %data);
+
 	if(!isEventPending(%this.checkToSendSched)) {
 		%this.checkToSend();
 	}
@@ -16,32 +22,35 @@ function LiveSaverTCPLines::send(%this, %data) {
 
 $LSIgnoreChecks = true;
 function LiveSaverTCPLines::checkToSend(%this) {
-	if(%this.rowCount() <= 0) {
-		if(%this.isSaving) {
-			%this.isSaving = false;
-			%this.send("SAVEEND");
-		} else {
-			return;
-		}
+	%other = LiveSaverTCPToProcess;
+	%list = %this;
+	if(%other.rowCount() > 0 && %this.rowCount() <= 0 && $Server::LS::ProcessQueue) {
+		%list = %other;
 	}
 
-	%this.checkToSendSched = %this.schedule(1, checkToSend);
-
-	%data = %this.getRowText(0);
-	%this.removeRow(0);
+	if(%other.rowCount() <= 0 && %this.rowCount() <= 0) {
+		return;
+	}
 
 	//%bypass = "\tdelete\tserverPort\tconnect\tload\tdelete\tsave\tcolorset\tcolorsetLength";
 	//if(!isObject($Server::LiveSaver[getField(%data, 1)]) && stripos(%bypass, "\t" @ getField(%data, 0) @ "\t") == -1) {
 	//	return;
 	//}
 
-	LiveSaverTCPObject.send(%data @ "\r\n");
-	echo("\c5[SENT]\c0" SPC %data);
+	if($Server::LS::Connected) {
+		%this.checkToSendSched = %this.schedule(1, checkToSend);
+
+		%data = %list.getRowText(0);
+		%list.removeRow(0);
+
+		LiveSaverTCPObject.send(%data @ "\r\n");
+		//echo("\c5[SENT]\c0" SPC %data);
+	}
 }
 
 function LiveSaverTCPObject::onLine(%this, %line) {
 	%line = trim(%line);
-	echo("\c4[RECV]\c0" SPC %line);
+	//echo("\c4[RECV]\c0" SPC %line);
 	
 	// if you host this to the outside world (WHICH YOU HAVE TO RECONFIGURE TO MAKE HAPPEN), don't come complaining to me when your server inevitably crashes.
 	// i am WELL AWARE of the security risks here, leave it on 127.0.0.1 and stick to trying to crash yourself thanks
@@ -51,20 +60,30 @@ function LiveSaverTCPObject::onLine(%this, %line) {
 
 function _LSRCMD_HELLO() {
 	messageAll('', "\c6Connected to the LiveSaver server.");
+	$Server::LS::Connected = true;
 
 	LiveSaverTCPLines.send("serverPort" TAB $Pref::Server::Port);
 }
 
 function _LSRCMD_okToLoad() {
 	if($LS::InitLoad $= "") {
-		%colors = _LSgetColorsetLength();
-		LiveSaverTCPLines.send("colorsetLength" TAB %colors);
-		for(%i = 0; %i < %colors; %i++) {
-			LiveSaverTCPLines.send("colorset" TAB %i TAB getColorIDTable(%i));
-		}
-		LiveSaverTCPLines.send("colorsetEnd");
+		LiveSaverTCPLines.send("load");
 	}
 	$LS::InitLoad = true;
+}
+
+function _LSRCMD_needColors() {
+	%colors = _LSgetColorsetLength();
+	LiveSaverTCPLines.send("colorsetLength" TAB %colors);
+	for(%i = 0; %i < %colors; %i++) {
+		LiveSaverTCPLines.send("colorset" TAB %i TAB getColorIDTable(%i));
+	}
+	LiveSaverTCPLines.send("colorsetEnd");
+}
+
+function _LSRCMD_okToProcess() {
+	$Server::LS::ProcessQueue = true;
+	LiveSaverTCPLines.checkToSend();
 }
 
 function _LSRCMD_beginLoad(%fields) {

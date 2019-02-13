@@ -3,6 +3,7 @@ exec("./support.cs");
 exec("./vars.cs");
 
 $Server::LSAddress = "127.0.0.1:" @ $Pref::Server::LSPort;
+$Server::LS::Connected = false;
 
 if($Server::LSHighestUniq $= "") {
 	$Server::LSHighestUniq = 0;
@@ -25,6 +26,12 @@ function initLiveSaverConnection() {
 	} else {
 		LiveSaverTCPLines.clear();
 	}
+
+	if(!isObject(LiveSaverTCPToProcess)) {
+		new GuiTextListCtrl(LiveSaverTCPToProcess);
+	} else {
+		LiveSaverTCPToProcess.clear();
+	}
 }
 initLiveSaverConnection();
 
@@ -32,18 +39,22 @@ function LiveSaverTCPObject::onConnected(%this) {
 	cancel($LiveSaverConnectRetryLoop);
 
 	echo("Connected to the LiveSaver server.");
-	LiveSaverTCPLines.send("connect");
+	LiveSaverTCPObject.send("connect\r\n");
 }
 
 function LiveSaverTCPObject::onConnectFailed(%this) {
 	cancel($LiveSaverConnectRetryLoop);
 	echo("Trying to connect to the LiveSaver server again (failed to connect)...");
+	$Server::LS::Connected = false;
+	$Server::LS::ProcessQueue = false;
 	$LiveSaverConnectRetryLoop = %this.schedule(1000, connect, $Server::LSAddress);
 }
 
 function LiveSaverTCPObject::onDisconnect(%this) {
 	cancel($LiveSaverConnectRetryLoop);
 	echo("Trying to connect to the LiveSaver server again (disconnected)...");
+	$Server::LS::Connected = false;
+	$Server::LS::ProcessQueue = false;
 	$LiveSaverConnectRetryLoop = %this.schedule(1000, connect, $Server::LSAddress);
 }
 

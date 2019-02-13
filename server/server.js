@@ -29,7 +29,7 @@ var funcs = {
 			console.log(`created vault for Blockland server port ${socket.BLPort}`);
 		}
 
-		socket.write("okToLoad\r\n");
+		socket.write("needColors\r\n");
 	},
 
 	"brick": function(socket, parts) {
@@ -230,6 +230,8 @@ var funcs = {
 			}
 
 			loadBLLS(socket, `./saves/${highestFile}`);
+
+			socket.write("okToLoad\r\n");
 		});
 	},
 
@@ -384,7 +386,7 @@ function exportBLS(socket) {
 	stream.write(`Linecount ${Object.keys(b).length}\r\n`);
 }
 
-function exportBLLS(socket) {
+function exportBLLS(socket, fnadd = "") {
 	if(!bricks.hasOwnProperty(socket.BLPort)) {
 		return;
 	}
@@ -394,7 +396,7 @@ function exportBLLS(socket) {
 
 	let c = currentColors[socket.BLPort];
 	let b = bricks[socket.BLPort];
-	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}.blls`);
+	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}${(fnadd == "" ? "" : `-${fnadd}`)}.blls`);
 
 	for(let idx in c) {
 		stream.write(`${c[idx]}\r\n`);
@@ -494,8 +496,11 @@ function loadBLLS(socket, file) {
 
 	fs.readFile(file, "utf8", function(err, data) {
 		if(err) {
-			throw err;
+			console.log(`Unable to load recent save, non-existant file: ${err}`);
+			socket.write("okToProcess\r\n");
+			return;
 		}
+
 		let lines = data.split("\n").map(x => x.trim());
 
 		let startedBricks = false;
@@ -557,6 +562,8 @@ function loadBLLS(socket, file) {
 					break;
 			}
 		}
+
+		socket.write("okToProcess\r\n");
 	});
 }
 
@@ -601,6 +608,13 @@ function handle(socket, parts) {
 		}
 	}
 }
+
+process.on("uncaughtException", function(e) {
+	for(let idx in TCPClients) {
+		let socket = TCPClients[idx];
+		exportBLLS(socket, "exceptionThrown");
+	}
+});
 
 var TCPClients = [];
 net.createServer(function(socket) {
