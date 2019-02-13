@@ -617,7 +617,7 @@ function handle(socket, parts) {
 	}
 }
 
-process.on("uncaughtException", function(e) {
+process.prependListener('uncaughtException', function(e) {
 	for(let idx in TCPClients) {
 		let socket = TCPClients[idx];
 		exportBLLS(socket, "exceptionThrown");
