@@ -9,11 +9,15 @@ function fxDTSBrick::sendLSUpdate(%this, %what, %rVal) {
 			%attr = "colorID";
 			%val = %this.getColorID();
 
+		case "print":
+			%attr = "print";
+			%val = _LSgetPrintName(%rVal);
+
 		case "item" or "emitter" or "light" or "vehicle" or "music":
 			%attr = %what;
 			%val = (isObject(%rVal) ? %rVal.getName() : "");
 
-		case "emitterDir" or "itemDir" or "itemPos" or "itemTime" or "colorVehicle" or "attr" or "name":
+		case "emitterDir" or "itemDir" or "itemPos" or "itemTime" or "colorVehicle" or "attr" or "name" or "colorFxID" or "shapeFxID":
 			%attr = %what;
 			%val = %rVal;
 	}
@@ -32,7 +36,7 @@ function fxDTSBrick::sendLSEventUpdate(%brick) {
 	if($Server::LSLoading) {
 		return;
 	}
-	
+
 	if(%brick.numEvents > 0) {
 		for(%idx = 0; %idx < %brick.numEvents; %idx++) {
 			cancel(%brick.updateDelay["event", %idx]);
@@ -143,6 +147,28 @@ package LSLivePackage {
 	function fxDTSBrick::setSound(%this, %db, %client) {
 		%this.sendLSUpdate("music", %db.getName());
 		parent::setSound(%this, %db, %client);		
+	}
+
+	function fxDTSBrick::setPrint(%this, %id) {
+		%this.sendLSUpdate("print", %id);
+		parent::setPrint(%this, %id);
+	}
+
+	function fxDTSBrick::setColorFX(%this, %fx) {
+		%this.schedule(33, _LS_delayCheckColorFX);
+		parent::setColorFX(%this, %fx);
+	}
+
+	function fxDTSBrick::setShapeFX(%this, %fx) {
+		%this.sendLSUpdate("shapeFxID", %this.shapeFxID || 0);
+		return parent::setShapeFX(%this, %fx);
+	}
+
+	function fxDTSBrick::_LS_delayCheckColorFX(%this) {
+		if($NDHN[%this] $= $oldNDHN[%this]) {
+			%this.sendLSUpdate("colorFxID", %this.colorFxID || 0);
+		}
+		$oldNDHN[%this] = $NDHN[%this];
 	}
 
 	function serverCmdAddEvent(%client, %enabled, %inputEventIdx, %delay, %targetIdx, %NTNameIdx, %outputEventIdx, %par1, %par2, %par3, %par4) {
