@@ -180,7 +180,7 @@ var funcs = {
 			return;
 		}
 
-		b[uniq][parts[2]] = parts[3];
+		b[uniq][parts[2]] = (typeof parts[3] === "undefined" ? "" : parts[3]);
 	},
 
 	"delete": function(socket, parts) {
@@ -446,13 +446,19 @@ function exportBLLS(socket, fnadd = "") {
 				stream.write(`${uniq}\t${data.join("\t")}\r\n`);
 
 				if(b[uniq].hasOwnProperty("emitter")) {
-					stream.write(`M\t${b[uniq].emitter}\t${b[uniq].emitterDir}\r\n`);
+					if(b[uniq].emitter != "") {
+						stream.write(`M\t${b[uniq].emitter}\t${b[uniq].emitterDir}\r\n`);
+					}
 				}
 				if(b[uniq].hasOwnProperty("item")) {
-					stream.write(`I\t${b[uniq].item}\t${b[uniq].itemDir}\t${b[uniq].itemPos}\t${b[uniq].itemTime}\r\n`);
+					if(b[uniq].item != "") {
+						stream.write(`I\t${b[uniq].item}\t${b[uniq].itemDir}\t${b[uniq].itemPos}\t${b[uniq].itemTime}\r\n`);
+					}
 				}
 				if(b[uniq].hasOwnProperty("vehicle")) {
-					stream.write(`V\t${b[uniq].vehicle}\t${b[uniq].colorVehicle}\r\n`);
+					if(b[uniq].vehicle != "") {
+						stream.write(`V\t${b[uniq].vehicle}\t${b[uniq].colorVehicle}\r\n`);
+					}
 				}
 				if(b[uniq].hasOwnProperty("events")) {
 					for(let idx in b[uniq].events) {
