@@ -1,6 +1,6 @@
 // todo: remove the stupid %attr crap, it was 3am when i wrote that or something
 function fxDTSBrick::sendLSUpdate(%this, %what, %rVal) {
-	if(%this._LS_uniq $= "" || !isObject(%this) || %this == %this.client.player.tempbrick || %this.isACTUALLYPlanted $= "") {
+	if(%this._LS_uniq $= "" || !isObject(%this) || %this == %this.client.player.tempbrick || %this.isACTUALLYPlanted $= "" || $Server::LSLoading) {
 		return;
 	}
 
@@ -29,6 +29,10 @@ function fxDTSBrick::sendLSUpdate(%this, %what, %rVal) {
 }
 
 function fxDTSBrick::sendLSEventUpdate(%brick) {
+	if($Server::LSLoading) {
+		return;
+	}
+	
 	if(%brick.numEvents > 0) {
 		for(%idx = 0; %idx < %brick.numEvents; %idx++) {
 			cancel(%brick.updateDelay["event", %idx]);
