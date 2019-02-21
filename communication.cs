@@ -72,6 +72,17 @@ function _LSRCMD_okToLoad() {
 	$LS::InitLoad = true;
 }
 
+function _LSRCMD_needUINames() {
+	for(%i = 0; %i < DataBlockGroup.getCount(); %i++) {
+		%db = DataBlockGroup.getObject(%i);
+		if(%db.getClassName() !$= "fxDTSBrickData") {
+			continue;
+		}
+		LiveSaverTCPLines.send("uiname" TAB %db.getName() TAB %db.uiName);
+	}
+	LiveSaverTCPLines.send("uinameEnd");
+}
+
 function _LSRCMD_needColors() {
 	%colors = _LSgetColorsetLength();
 	LiveSaverTCPLines.send("colorsetLength" TAB %colors);

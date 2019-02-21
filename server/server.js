@@ -15,6 +15,7 @@ var bricks = {};
 var colors = {};
 var currentColors = {};
 var colorTranslations = {};
+var uiNameTranslations = {};
 
 if(!fs.existsSync("./logs")) {
 	fs.mkdirSync("./logs");
@@ -59,6 +60,27 @@ var funcs = {
 			log(socket, `created vault`);
 		}
 
+		if(!colors.hasOwnProperty(socket.BLPort)) {
+			colors[socket.BLPort] = {};
+			log(socket, `created storage colorset`);
+		}
+
+		if(!currentColors.hasOwnProperty(socket.BLPort)) {
+			currentColors[socket.BLPort] = {};
+			log(socket, `created active colorset`);
+		}
+
+		if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
+			colorTranslations[socket.BLPort] = {};
+			log(socket, `created colorset translation table`);
+		}
+
+		if(!uiNameTranslations.hasOwnProperty(socket.BLPort)) {
+			uiNameTranslations[socket.BLPort] = {};
+			log(socket, `created ui name translation table`);
+		}
+
+		socket.write("needUINames\r\n");
 		socket.write("needColors\r\n");
 	},
 
@@ -226,11 +248,6 @@ var funcs = {
 	},
 
 	"colorsetLength": function(socket, parts) {
-		if(!currentColors.hasOwnProperty(socket.BLPort)) {
-			currentColors[socket.BLPort] = {};
-			log(socket, `created colorset`);
-		}
-
 		let c = currentColors[socket.BLPort];
 		for(let idx in c) {
 			delete c[idx];
@@ -302,6 +319,10 @@ var funcs = {
 		}
 
 		loadBLLS(socket, filename);
+	},
+
+	"uiname": function(socket, parts) {
+		uiNameTranslations[socket.BLPort][parts[1]] = parts[2];
 	}
 };
 
@@ -351,18 +372,8 @@ function sendBrick(socket, uniq) {
 }
 
 function emulateCM3(socket) {
-	if(!colors.hasOwnProperty(socket.BLPort)) {
-		colors[socket.BLPort] = {};
-		log(socket, `created colorset`);
-	}
-
-	if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
-		colorTranslations[socket.BLPort] = {};
-		log(socket, `created colorset translation table`);
-	} else {
-		for(let z in colorTranslations[socket.BLPort]) {
-			delete colorTranslations[socket.BLPort][z]
-		}		
+	for(let z in colorTranslations[socket.BLPort]) {
+		delete colorTranslations[socket.BLPort][z]
 	}
 
 	let c = colors[socket.BLPort];
@@ -422,14 +433,6 @@ function emulateCM3(socket) {
 }
 
 function exportBLS(socket) {
-	// wip
-	if(!bricks.hasOwnProperty(socket.BLPort)) {
-		return;
-	}
-	if(!colors.hasOwnProperty(socket.BLPort)) {
-		return;
-	}
-
 	let c = colors[socket.BLPort];
 	let b = bricks[socket.BLPort];
 	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}.bls`);
@@ -444,13 +447,6 @@ function exportBLS(socket) {
 }
 
 function exportBLLS(socket, fnadd = "") {
-	if(!bricks.hasOwnProperty(socket.BLPort)) {
-		return;
-	}
-	if(!currentColors.hasOwnProperty(socket.BLPort)) {
-		return;
-	}
-
 	let c = currentColors[socket.BLPort];
 	let b = bricks[socket.BLPort];
 	let fn = `./saves/${Date.now()}-${socket.BLPort}${(fnadd == "" ? "" : `-${fnadd}`)}.blls`;
@@ -537,23 +533,8 @@ function exportBLLS(socket, fnadd = "") {
 function loadBLLS(socket, file) {
 	log(socket, `attempting to load BLLS ${file}`);
 
-	if(!bricks.hasOwnProperty(socket.BLPort)) {
-		bricks[socket.BLPort] = {};
-		log(socket, `created vault`);
-	}
-
-	if(!colors.hasOwnProperty(socket.BLPort)) {
-		colors[socket.BLPort] = {};
-		log(socket, `created colorset`);
-	} else {
-		for(let z in colors[socket.BLPort]) {
-			delete colors[socket.BLPort][z]
-		}
-	}
-
-	if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
-		colorTranslations[socket.BLPort] = {};
-		log(socket, `created colorset translation table`);
+	for(let z in colors[socket.BLPort]) {
+		delete colors[socket.BLPort][z]
 	}
 
 	let c = colors[socket.BLPort];
