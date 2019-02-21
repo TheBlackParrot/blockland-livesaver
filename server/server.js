@@ -16,6 +16,32 @@ var colors = {};
 var currentColors = {};
 var colorTranslations = {};
 
+var logBuffer;
+var oldDate = "";
+
+function log(socket, data) {
+	let port = "?????";
+	if(socket.hasOwnProperty("BLPort")) {
+		port = socket.BLPort.toString();
+	}
+
+	let d = new Date();
+	let time = d.toString().split(" ")[4];
+	let date = d.toJSON().toString().split("T")[0];
+
+	if(oldDate != date) {
+		if(logBuffer) {
+			logBuffer.end();
+		}
+		logBuffer = fs.createWriteStream(`./logs/${date}.log`, {flags: "a"});
+	}
+	oldDate = date;
+
+	let out = `[${port}, ${time}] ${data}`;
+	logBuffer.write(out + "\r\n");
+	console.log(out);
+}
+
 var funcs = {
 	"connect": function(socket, parts) {
 		return "HELLO";
@@ -26,7 +52,7 @@ var funcs = {
 
 		if(!bricks.hasOwnProperty(socket.BLPort)) {
 			bricks[socket.BLPort] = {};
-			console.log(`created vault for Blockland server port ${socket.BLPort}`);
+			log(socket, `created vault`);
 		}
 
 		socket.write("needColors\r\n");
@@ -198,7 +224,7 @@ var funcs = {
 	"colorsetLength": function(socket, parts) {
 		if(!currentColors.hasOwnProperty(socket.BLPort)) {
 			currentColors[socket.BLPort] = {};
-			console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+			log(socket, `created colorset`);
 		}
 
 		let c = currentColors[socket.BLPort];
@@ -279,7 +305,7 @@ function sendBrick(socket, uniq) {
 	var b = bricks[socket.BLPort];
 
 	if(!b.hasOwnProperty(uniq)) {
-		console.log(`failed to send brick ${uniq}, not vaulted`);
+		log(socket, `failed to send brick ${uniq}, not vaulted`);
 		return;
 	}
 
@@ -323,12 +349,12 @@ function sendBrick(socket, uniq) {
 function emulateCM3(socket) {
 	if(!colors.hasOwnProperty(socket.BLPort)) {
 		colors[socket.BLPort] = {};
-		console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+		log(socket, `created colorset`);
 	}
 
 	if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
 		colorTranslations[socket.BLPort] = {};
-		console.log(`created colorset translation table for Blockland server port ${socket.BLPort}`);
+		log(socket, `created colorset translation table`);
 	} else {
 		for(let z in colorTranslations[socket.BLPort]) {
 			delete colorTranslations[socket.BLPort][z]
@@ -339,10 +365,8 @@ function emulateCM3(socket) {
 	let cc = currentColors[socket.BLPort];
 	let ct = colorTranslations[socket.BLPort];
 
-	console.log("c");
-	console.log(Object.values(c).join(", "));
-	console.log("cc");
-	console.log(Object.values(cc).join(", "));
+	log(socket, `save colors\r\n${Object.values(c).join(", ")}`);
+	log(socket, `current colors\r\n${Object.values(cc).join(", ")}`);
 
 	for(let idx in c) {
 		color = c[idx].split(" ").map(parseFloat);
@@ -390,8 +414,7 @@ function emulateCM3(socket) {
 		}
 	}
 
-	console.log("ct");
-	console.log(Object.values(ct).join(", "));
+	log(socket, `color translation table\r\n${Object.values(ct).join(", ")}`);
 }
 
 function exportBLS(socket) {
@@ -503,21 +526,21 @@ function exportBLLS(socket, fnadd = "") {
 		}
 	}
 
-	console.log(`saved ${socket.BLPort} to ${fn}`);
+	log(socket, `saved to ${fn}`);
 	stream.end();
 }
 
 function loadBLLS(socket, file) {
-	console.log(`attempting to load ${file} on ${socket.BLPort}`);
+	log(socket, `attempting to load BLLS ${file}`);
 
 	if(!bricks.hasOwnProperty(socket.BLPort)) {
 		bricks[socket.BLPort] = {};
-		console.log(`created vault for Blockland server port ${socket.BLPort}`);
+		log(socket, `created vault`);
 	}
 
 	if(!colors.hasOwnProperty(socket.BLPort)) {
 		colors[socket.BLPort] = {};
-		console.log(`created colorset for Blockland server port ${socket.BLPort}`);
+		log(socket, `created colorset`);
 	} else {
 		for(let z in colors[socket.BLPort]) {
 			delete colors[socket.BLPort][z]
@@ -526,7 +549,7 @@ function loadBLLS(socket, file) {
 
 	if(!colorTranslations.hasOwnProperty(socket.BLPort)) {
 		colorTranslations[socket.BLPort] = {};
-		console.log(`created colorset translation table for Blockland server port ${socket.BLPort}`);
+		log(socket, `created colorset translation table`);
 	}
 
 	let c = colors[socket.BLPort];
@@ -536,7 +559,7 @@ function loadBLLS(socket, file) {
 
 	fs.readFile(file, "utf8", function(err, data) {
 		if(err) {
-			console.log(`Unable to load recent save, non-existant file: ${err}`);
+			log(socket, `Unable to load recent save\r\n${err}`);
 			socket.write("okToProcess\r\n");
 			return;
 		}
@@ -626,7 +649,8 @@ function handle(socket, parts) {
 		return;
 	}
 
-	console.log("[" + socket.remotePort + "] " + parts.join(" "));
+	log(socket, parts.join(" "));
+	//console.log(parts.join(" "));
 
 	let send = function(data) {
 		socket.write(data + "\r\n");
@@ -649,12 +673,14 @@ function handle(socket, parts) {
 	}
 }
 
-process.prependListener('uncaughtException', function(e) {
-	for(let idx in TCPClients) {
-		let socket = TCPClients[idx];
-		exportBLLS(socket, "exceptionThrown");
-	}
-});
+if(!settings.devMode) {
+	process.prependListener('uncaughtException', function(e) {
+		for(let idx in TCPClients) {
+			let socket = TCPClients[idx];
+			exportBLLS(socket, "exceptionThrown");
+		}
+	});
+}
 
 var TCPClients = [];
 net.createServer(function(socket) {

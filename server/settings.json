@@ -3,5 +3,6 @@
 		"port": 27998
 	},
 
-	"saveInterval": 30
+	"saveInterval": 30,
+	"devMode": true
 }
