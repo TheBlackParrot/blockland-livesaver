@@ -16,6 +16,10 @@ var colors = {};
 var currentColors = {};
 var colorTranslations = {};
 
+if(!fs.existsSync("./logs")) {
+	fs.mkdirSync("./logs");
+}
+
 var logBuffer;
 var oldDate = "";
 
