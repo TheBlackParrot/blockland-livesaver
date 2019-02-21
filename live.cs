@@ -155,13 +155,13 @@ package LSLivePackage {
 	}
 
 	function fxDTSBrick::setColorFX(%this, %fx) {
-		%this.schedule(33, _LS_delayCheckColorFX);
+		%this.schedule(66, _LS_delayCheckColorFX);
 		parent::setColorFX(%this, %fx);
 	}
 
 	function fxDTSBrick::setShapeFX(%this, %fx) {
 		%this.sendLSUpdate("shapeFxID", %this.shapeFxID || 0);
-		return parent::setShapeFX(%this, %fx);
+		parent::setShapeFX(%this, %fx);
 	}
 
 	function fxDTSBrick::_LS_delayCheckColorFX(%this) {

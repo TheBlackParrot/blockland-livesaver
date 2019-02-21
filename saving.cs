@@ -124,6 +124,15 @@ package LiveSaverPackage {
 		parent::onRemove(%brick);
 	}
 
+	function serverCmdClearAllBricks(%client) {
+		if(%client.isAdmin && getBrickcount() > 0) {
+			LiveSaverTCPLines.send("save");
+			LiveSaverTCPLines.send("clear");
+		}
+
+		return parent::serverCmdClearAllBricks(%client);
+	}
+
 	function onMissionEnded() {
 		LiveSaverTCPLines.send("save");
 		return parent::onMissionEnded();

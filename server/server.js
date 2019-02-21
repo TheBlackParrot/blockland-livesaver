@@ -221,7 +221,7 @@ var funcs = {
 				let fparts = files[idx].split("-");
 
 				let timestamp = parseInt(fparts[0]);
-				let port = fparts[1];
+				let port = parseInt(fparts[1]);
 
 				if(timestamp > highest && port == socket.BLPort) {
 					highest = timestamp;
@@ -244,6 +244,19 @@ var funcs = {
 		//fs.writeFileSync(`./saves/${Date.now()}-${socket.BLPort}.json`, JSON.stringify(bricks[socket.BLPort]), "utf8");
 
 		exportBLLS(socket);
+	},
+
+	"clear": function(socket, parts) {
+		if(parts.length > 1) {
+			if(parseInt(parts[1])) {
+				exportBLLS(socket);
+			}
+		}
+
+		var b = bricks[socket.BLPort];
+		for(uniq in b) {
+			delete b[uniq];
+		}
 	}
 };
 
@@ -478,6 +491,8 @@ function exportBLLS(socket, fnadd = "") {
 }
 
 function loadBLLS(socket, file) {
+	console.log(`attempting to load ${file} on ${socket.BLPort}`);
+
 	if(!bricks.hasOwnProperty(socket.BLPort)) {
 		bricks[socket.BLPort] = {};
 		console.log(`created vault for Blockland server port ${socket.BLPort}`);

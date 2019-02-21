@@ -88,6 +88,11 @@ function _LSRCMD_okToProcess() {
 
 function _LSRCMD_beginLoad(%fields) {
 	$Server::LSLoading = true;
+
+	%quotaObj = getCurrentQuotaObject();
+	clearCurrentQuotaObject();
+	if(isObject(%quotaObj))
+		setCurrentQuotaObject(%quotaObj);
 }
 
 function _LSRCMD_endLoad(%fields) {
