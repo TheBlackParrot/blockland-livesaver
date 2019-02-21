@@ -141,10 +141,15 @@ function _LSRCMD_brick(%fields) {
 		warn("Failed to create brick" SPC %uniq);
 		return;
 	}
-	%brick.setNTObjectName(%name);
 
+	%err = %brick.plant();
+	if(%err == 1 || %err == 3 || %err == 5) {
+		%brick.delete();
+		return;
+	}
+
+	%brick.setNTObjectName(%name);
 	%group.add(%brick);
-	%brick.plant();
 	%brick.setTrusted(1);
 	$Server::LiveSaver[%brick._LS_uniq] = %brick;
 	%group.addNTName(%name);
