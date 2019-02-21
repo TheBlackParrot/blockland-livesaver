@@ -4,5 +4,5 @@
 	},
 
 	"saveInterval": 30,
-	"devMode": true
+	"devMode": false
 }
