@@ -257,6 +257,21 @@ var funcs = {
 		for(uniq in b) {
 			delete b[uniq];
 		}
+	},
+
+	"loadBLLS": function(socket, parts) {
+		let filename = `./saves/${parts[1]}`;
+		if(!fs.existsSync(filename)) {
+			return;
+		}
+
+		exportBLLS(socket);
+		var b = bricks[socket.BLPort];
+		for(uniq in b) {
+			delete b[uniq];
+		}
+
+		loadBLLS(socket, filename);
 	}
 };
 
@@ -411,7 +426,8 @@ function exportBLLS(socket, fnadd = "") {
 
 	let c = currentColors[socket.BLPort];
 	let b = bricks[socket.BLPort];
-	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}${(fnadd == "" ? "" : `-${fnadd}`)}.blls`);
+	let fn = `./saves/${Date.now()}-${socket.BLPort}${(fnadd == "" ? "" : `-${fnadd}`)}.blls`;
+	let stream = fs.createWriteStream(fn);
 
 	for(let idx in c) {
 		stream.write(`${c[idx]}\r\n`);
@@ -487,6 +503,7 @@ function exportBLLS(socket, fnadd = "") {
 		}
 	}
 
+	console.log(`saved ${socket.BLPort} to ${fn}`);
 	stream.end();
 }
 
