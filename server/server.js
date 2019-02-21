@@ -267,6 +267,11 @@ var funcs = {
 			for(let idx in files) {
 				let fparts = files[idx].split("-");
 
+				let ext = fparts[1].split(".")[1];
+				if(ext != "blls") {
+					continue;
+				}
+
 				let timestamp = parseInt(fparts[0]);
 				let port = parseInt(fparts[1]);
 
@@ -322,7 +327,11 @@ var funcs = {
 	},
 
 	"uiname": function(socket, parts) {
-		uiNameTranslations[socket.BLPort][parts[1]] = parts[2];
+		uiNameTranslations[socket.BLPort][parts[1]] = parts[2].replace(/\[DEG\]/g, "\xb0");
+	},
+
+	"saveBLS": function(socket, parts) {
+		exportBLS(socket);
 	}
 };
 
@@ -435,15 +444,53 @@ function emulateCM3(socket) {
 function exportBLS(socket) {
 	let c = colors[socket.BLPort];
 	let b = bricks[socket.BLPort];
-	let stream = fs.createWriteStream(`./saves/${Date.now()}-${socket.BLPort}.bls`);
+	let fn = `./saves/${Date.now()}-${socket.BLPort}.bls`;
+	// blockland specifically wants latin1/ISO-8859-1/ANSI here
+	let stream = fs.createWriteStream(fn, {encoding: "latin1"});
 
-	stream.write(`This is a Blockland save file.  You probably shouldn't modify it cause you'll screw it up.\r\n1\r\nLiveSaver autosave from server port ${socket.BLPort} ts ${Date.now()}`);
+	stream.write(`This is a Blockland save file.  You probably shouldn't modify it cause you'll screw it up.\r\n1\r\nLiveSaver autosave from server port ${socket.BLPort} ts ${Date.now()}\r\n`);
 
-	for(let idx in c) {
-		stream.write(`${c[idx]}\r\n`);
+	for(let idx = 0; idx < 64; idx++) {
+		let color = (idx < Object.keys(c).length ? c[idx] : "1.000000 0.000000 1.000000 0.000000");
+		stream.write(`${color}\r\n`);
 	}
 
 	stream.write(`Linecount ${Object.keys(b).length}\r\n`);
+
+/*
+		b[uniq].name = parts[2];
+		b[uniq].owner = parts[3];
+		b[uniq].angleID = parts[4];
+		b[uniq].colorFxID = parts[5];
+		b[uniq].shapeFxID = parts[6];
+		b[uniq].colorID = parts[7];
+		b[uniq].dataBlock = parts[8];
+		b[uniq].position = parts[9];
+		b[uniq].rotation = parts[10];
+		b[uniq].print = parts[11];
+		b[uniq].light = parts[12];
+		b[uniq].music = parts[13];
+		b[uniq].attr = parts[14];
+*/
+	for(let uniq in b) {
+		let brick = b[uniq];
+		let parts = [
+			uiNameTranslations[socket.BLPort][brick.dataBlock] + "\"",
+			brick.position,
+			brick.angleID,
+			1,
+			brick.colorID,
+			"",
+			brick.colorFxID,
+			brick.shapeFxID,
+			brick.attr
+		];
+		stream.write(`${parts.join(" ")}\r\n`);
+		stream.write(`+-OWNER ${brick.owner}\r\n`);
+	}
+
+	stream.end();
+	log(socket, `saved BLS to ${fn}`);
 }
 
 function exportBLLS(socket, fnadd = "") {

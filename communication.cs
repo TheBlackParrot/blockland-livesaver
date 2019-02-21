@@ -78,7 +78,10 @@ function _LSRCMD_needUINames() {
 		if(%db.getClassName() !$= "fxDTSBrickData") {
 			continue;
 		}
-		LiveSaverTCPLines.send("uiname" TAB %db.getName() TAB %db.uiName);
+		// BLS FORMAT NEEDS TO DIE
+		// ALSO: TO HELL WITH RAMPS. >:C
+		LiveSaverTCPLines.send("uiname" TAB %db.getName() TAB strReplace(%db.uiName, "\xb0", "[DEG]"));
+		echo(strReplace(%db.uiName, "°", "[DEG]"));
 	}
 	LiveSaverTCPLines.send("uinameEnd");
 }
