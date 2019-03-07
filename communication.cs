@@ -228,9 +228,9 @@ function _LSRCMD_brickVehicle(%fields) {
 	}
 
 	%vehicle = getField(%fields, 1);
+	%brick.reColorVehicle = getField(%fields, 2);
 	if(isObject(%vehicle)) {
 		%brick.setVehicle(nameToID(getField(%fields, 1)));
-		%brick.reColorVehicle = getField(%fields, 2);
 	}
 }
 
