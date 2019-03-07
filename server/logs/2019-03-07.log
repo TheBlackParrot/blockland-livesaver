@@ -2361,3 +2361,175 @@
 [28000, 22:37:47] saved to ./saves/1551933467187-28000.blls
 [28000, 22:37:49] save
 [28000, 22:37:49] saved to ./saves/1551933469512-28000.blls
+[?????, 22:46:35] connect
+[?????, 22:46:35] serverPort 28000
+[28000, 22:46:35] created vault
+[28000, 22:46:35] created storage colorset
+[28000, 22:46:35] created active colorset
+[28000, 22:46:35] created colorset translation table
+[28000, 22:46:35] created ui name translation table
+[28000, 22:46:35] created ui name translation table
+[28000, 22:46:35] uiname brick1x1Data 1x1
+[28000, 22:46:35] uiname brick1x2Data 1x2
+[28000, 22:46:35] uiname brick1x3Data 1x3
+[28000, 22:46:35] uiname brick1x4Data 1x4
+[28000, 22:46:35] uiname brick1x6Data 1x6
+[28000, 22:46:35] uiname brick1x8Data 1x8
+[28000, 22:46:35] uiname brick1x10Data 1x10
+[28000, 22:46:35] uiname brick1x12Data 1x12
+[28000, 22:46:35] uiname brick1x16Data 1x16
+[28000, 22:46:35] uiname brick2x2Data 2x2
+[28000, 22:46:35] uiname brick2x3Data 2x3
+[28000, 22:46:35] uiname brick2x4Data 2x4
+[28000, 22:46:35] uiname brick2x6Data 2x6
+[28000, 22:46:35] uiname brick2x8Data 2x8
+[28000, 22:46:35] uiname brick2x10Data 2x10
+[28000, 22:46:35] uiname brick4x4Data 4x4
+[28000, 22:46:35] uiname brick4x6Data 4x6
+[28000, 22:46:35] uiname brick4x8Data 4x8
+[28000, 22:46:35] uiname brick4x10Data 4x10
+[28000, 22:46:35] uiname brick4x12Data 4x12
+[28000, 22:46:35] uiname brick4x16Data 4x16
+[28000, 22:46:35] uiname brick8x8Data 8x8
+[28000, 22:46:35] uiname brick8x16Data 8x16
+[28000, 22:46:35] uiname brick10x10Data 10x10
+[28000, 22:46:35] uiname brick10x20Data 10x20
+[28000, 22:46:35] uiname brick12x24Data 12x24
+[28000, 22:46:35] uiname brick2x2x3Data 2x2x3
+[28000, 22:46:35] uiname brick2x4x3Data 2x4x3
+[28000, 22:46:35] uiname brick2x6x3Data 2x6x3
+[28000, 22:46:35] uiname brick1x1x5Data 1x1x5
+[28000, 22:46:35] uiname brick1x2x5Data 1x2x5
+[28000, 22:46:35] uiname brick1x3x5Data 1x3x5
+[28000, 22:46:35] uiname brick1x4x5Data 1x4x5
+[28000, 22:46:35] uiname brick1x6x5Data 1x6x5
+[28000, 22:46:35] uiname brick1x12x5Data 1x12x5
+[28000, 22:46:35] uiname brick2x2x5Data 2x2x5
+[28000, 22:46:35] uiname brick2x3x5Data 2x3x5
+[28000, 22:46:35] uiname brick2x4x5Data 2x4x5
+[28000, 22:46:35] uiname brick2x6x5Data 2x6x5
+[28000, 22:46:35] uiname brick2x12x5Data 2x12x5
+[28000, 22:46:35] uiname brick1x1fData 1x1F
+[28000, 22:46:35] uiname brick1x2fData 1x2F
+[28000, 22:46:35] uiname brick1x3fData 1x3F
+[28000, 22:46:35] uiname brick1x4fData 1x4F
+[28000, 22:46:35] uiname brick1x6fData 1x6F
+[28000, 22:46:35] uiname brick1x8fData 1x8F
+[28000, 22:46:35] uiname brick1x10fData 1x10F
+[28000, 22:46:35] uiname brick1x12fData 1x12F
+[28000, 22:46:35] uiname brick1x16fData 1x16F
+[28000, 22:46:35] uiname brick2x2fData 2x2F
+[28000, 22:46:35] uiname brick2x3fData 2x3F
+[28000, 22:46:35] uiname brick2x4fData 2x4F
+[28000, 22:46:35] uiname brick2x6fData 2x6F
+[28000, 22:46:35] uiname brick2x8fData 2x8F
+[28000, 22:46:35] uiname brick2x10fData 2x10F
+[28000, 22:46:35] uiname brick4x4fData 4x4F
+[28000, 22:46:35] uiname brick4x6fData 4x6F
+[28000, 22:46:35] uiname brick4x8fData 4x8F
+[28000, 22:46:35] uiname brick4x10fData 4x10F
+[28000, 22:46:35] uiname brick4x12fData 4x12F
+[28000, 22:46:35] uiname brick4x16fData 4x16F
+[28000, 22:46:35] uiname brick6x6fData 6x6F
+[28000, 22:46:35] uiname brick6x8fData 6x8F
+[28000, 22:46:35] uiname brick6x10fData 6x10F
+[28000, 22:46:35] uiname brick6x12fData 6x12F
+[28000, 22:46:35] uiname brick6x16fData 6x16F
+[28000, 22:46:35] uiname brick6x24fData 6x24F
+[28000, 22:46:35] uiname brick8x8fData 8x8F
+[28000, 22:46:35] uiname brick8x16fData 8x16F
+[28000, 22:46:35] uiname brick1x1RoundData 1x1 Round
+[28000, 22:46:35] uiname brick1x1ConeData 1x1 Cone
+[28000, 22:46:35] uiname brick2x2RoundData 2x2 Round
+[28000, 22:46:35] uiname brick2x2x2ConeData 2x2x2 Cone
+[28000, 22:46:35] uiname brick1x1fRoundData 1x1F Round
+[28000, 22:46:35] uiname brick2x2fRoundData 2x2F Round
+[28000, 22:46:35] uiname brick2x2DiscData 2x2 Disc
+[28000, 22:46:35] uiname brick3x1x7WallData Castle Wall
+[28000, 22:46:35] uiname brick4x1x5windowData 1x4x5 Window
+[28000, 22:46:35] uiname brick2x2x5girderData 2x2x5 Lattice
+[28000, 22:46:35] uiname brickPineTreeData Pine Tree
+[28000, 22:46:35] uiname brick4x1x2FenceData 1x4x2 Fence
+[28000, 22:46:35] uiname brick1x3RampData 25[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x3RampData 25[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick4x3RampData 25[DEG] Ramp 4x
+[28000, 22:46:35] uiname brick1x3RampUpData -25[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x3RampUpData -25[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick3x3RampCornerData 25[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick3x3RampUpCornerData -25[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick4x2crestLowData 25[DEG] Crest 4x
+[28000, 22:46:35] uiname brick2x2crestLowData 25[DEG] Crest 2x
+[28000, 22:46:35] uiname brick1x2crestLowData 25[DEG] Crest 1x
+[28000, 22:46:35] uiname brick1x2crestLowEndData 25[DEG] Crest End
+[28000, 22:46:35] uiname brick2x2crestLowCornerData 25[DEG] Crest Corner
+[28000, 22:46:35] uiname brick1x2RampData 45[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x2RampData 45[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick4x2RampData 45[DEG] Ramp 4x
+[28000, 22:46:35] uiname brick1x2RampUpData -45[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x2RampUpData -45[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick2x2RampCornerData 45[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick2x2RampUpCornerData -45[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick4x2crestHighData 45[DEG] Crest 4x
+[28000, 22:46:35] uiname brick2x2crestHighData 45[DEG] Crest 2x
+[28000, 22:46:35] uiname brick1x2crestHighData 45[DEG] Crest 1x
+[28000, 22:46:35] uiname brick1x2crestHighEndData 45[DEG] Crest End
+[28000, 22:46:35] uiname brick2x2crestHighCornerData 45[DEG] Crest Corner
+[28000, 22:46:35] uiname brick1x2x3RampData 72[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x2x3RampData 72[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick2x2x3RampCornerData 72[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick1x2x3RampUpData -72[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x2x3RampUpData -72[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick2x2x3RampUpCornerData -72[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick1x2x5RampData 80[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x2x5RampData 80[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick2x2x5RampCornerData 80[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick1x2x5RampUpData -80[DEG] Ramp 1x
+[28000, 22:46:35] uiname brick2x2x5RampUpData -80[DEG] Ramp 2x
+[28000, 22:46:35] uiname brick2x2x5RampUpCornerData -80[DEG] Ramp Corner
+[28000, 22:46:35] uiname brick16x16fData 16x16 Base
+[28000, 22:46:35] uiname brick16x32fData 16x32 Base
+[28000, 22:46:35] uiname brick32x32fData 32x32 Base
+[28000, 22:46:35] uiname brick48x48fData 48x48 Base
+[28000, 22:46:35] uiname brick64x64fData 64x64 Base
+[28000, 22:46:35] uiname brick32x32froadsData 32x32 Road
+[28000, 22:46:35] uiname brick32x32froadtData 32x32 Road T
+[28000, 22:46:35] uiname brick32x32froadcData 32x32 Road C
+[28000, 22:46:35] uiname brick32x32froadxData 32x32 Road X
+[28000, 22:46:35] uiname brick2x2RampPrintData 45[DEG] Ramp 2x Print
+[28000, 22:46:35] uiname brick2x2RampUpPrintData -45[DEG] Ramp 2x Print
+[28000, 22:46:35] uiname brick2x2fPrintData 2x2F Print
+[28000, 22:46:35] uiname brick1x2fPrintData 1x2F Print
+[28000, 22:46:35] uiname brick1x1fPrintData 1x1F Print
+[28000, 22:46:35] uiname brick1x1PrintData 1x1 Print
+[28000, 22:46:35] uiname brick1x4x4PrintData 1x4x4 Print
+[28000, 22:46:35] uiname brickMusicData Music Brick
+[28000, 22:46:35] uiname brickSpawnPointData Spawn Point
+[28000, 22:46:35] uiname brickVehicleSpawnData Vehicle Spawn
+[28000, 22:46:35] uinameEnd
+[28000, 22:46:35] colorsetLength 24
+[28000, 22:46:35] colorset 0 1.000000 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 1 0.847059 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 2 0.694118 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 3 0.541176 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 4 0.392157 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 5 0.239216 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 6 0.090196 0.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 7 0.000000 0.054902 1.000000 1.000000
+[28000, 22:46:35] colorset 8 0.000000 0.203922 1.000000 1.000000
+[28000, 22:46:35] colorset 9 0.000000 0.356863 1.000000 1.000000
+[28000, 22:46:35] colorset 10 0.000000 0.509804 1.000000 1.000000
+[28000, 22:46:35] colorset 11 0.000000 0.658824 1.000000 1.000000
+[28000, 22:46:35] colorset 12 0.000000 0.811765 1.000000 1.000000
+[28000, 22:46:35] colorset 13 0.000000 0.956863 1.000000 1.000000
+[28000, 22:46:35] colorset 14 0.000000 1.000000 0.882353 1.000000
+[28000, 22:46:35] colorset 15 0.000000 1.000000 0.729412 1.000000
+[28000, 22:46:35] colorset 16 1.000000 1.000000 1.000000 1.000000
+[28000, 22:46:35] colorset 17 0.501961 0.501961 0.501961 1.000000
+[28000, 22:46:35] colorset 18 0.000000 0.000000 0.000000 1.000000
+[28000, 22:46:35] colorset 19 1.000000 0.000000 0.000000 1.000000
+[28000, 22:46:35] colorset 20 1.000000 0.501961 0.000000 1.000000
+[28000, 22:46:35] colorset 21 1.000000 1.000000 0.000000 1.000000
+[28000, 22:46:35] colorset 22 0.000000 1.000000 0.000000 1.000000
+[28000, 22:46:35] colorset 23 0.000000 1.000000 1.000000 1.000000
+[28000, 22:46:35] colorsetEnd
+[28000, 22:46:35] attempting to load BLLS ./saves/1551933469512-28000.blls

@@ -730,7 +730,7 @@ function loadBLLS(socket, file) {
 function saveOnAllSockets() {
 	for(let idx in TCPClients) {
 		let socket = TCPClients[idx];
-		if(Date.now() - lastUpdate[socket.BLPort] > settings.saving.interval*60*1000) {
+		if(Date.now() - lastUpdate[socket.BLPort] > settings.saving.interval*60*1000 && settings.saving.skipIfNoChange) {
 			log(socket, `skipping saving, last change more than ${settings.saving.interval} minute${settings.saving.interval > 1 ? "s" : ""} ago`);
 			continue;
 		}
