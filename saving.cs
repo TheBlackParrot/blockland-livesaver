@@ -133,6 +133,22 @@ package LiveSaverPackage {
 		return parent::serverCmdClearAllBricks(%client);
 	}
 
+	function serverCmdClearSpamBricks(%client) {
+		if(%client.isAdmin && getBrickcount() > 0) {
+			LiveSaverTCPLines.send("save");
+		}
+
+		return parent::serverCmdClearSpamBricks(%client);
+	}
+
+	function serverCmdClearFloatingBricks(%client) {
+		if(%client.isAdmin && getBrickcount() > 0) {
+			LiveSaverTCPLines.send("save");
+		}
+
+		return parent::serverCmdClearFloatingBricks(%client);
+	}
+
 	function onMissionEnded() {
 		LiveSaverTCPLines.send("save");
 		return parent::onMissionEnded();
