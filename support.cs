@@ -14,3 +14,5 @@ function _LSgetColorsetLength() {
 	}
 	return %count || 0;
 }
+
+exec("./lib/namedtargets.cs");

@@ -67,7 +67,7 @@ function _LSRCMD_HELLO() {
 
 function _LSRCMD_okToLoad() {
 	if($LS::InitLoad $= "") {
-		LiveSaverTCPLines.send("load");
+		LiveSaverTCPLines.schedule(100, send, "load");
 	}
 	$LS::InitLoad = true;
 }
@@ -162,11 +162,11 @@ function _LSRCMD_brick(%fields) {
 		return;
 	}
 
-	%brick.setNTObjectName(%name);
 	%group.add(%brick);
+	%brick.setNTObjectName(%name);
 	%brick.setTrusted(1);
 	$Server::LiveSaver[%brick._LS_uniq] = %brick;
-	%group.addNTName(%name);
+	//%group.addNTName(%name);
 
 	if(%light !$= "") { %brick.setLight(%light); }
 	if(%music !$= "") { %brick.setMusic(%music); }

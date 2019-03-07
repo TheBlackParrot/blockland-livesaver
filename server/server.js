@@ -457,21 +457,27 @@ function exportBLS(socket) {
 
 	stream.write(`Linecount ${Object.keys(b).length}\r\n`);
 
-/*
-		b[uniq].name = parts[2];
-		b[uniq].owner = parts[3];
-		b[uniq].angleID = parts[4];
-		b[uniq].colorFxID = parts[5];
-		b[uniq].shapeFxID = parts[6];
-		b[uniq].colorID = parts[7];
-		b[uniq].dataBlock = parts[8];
-		b[uniq].position = parts[9];
-		b[uniq].rotation = parts[10];
-		b[uniq].print = parts[11];
-		b[uniq].light = parts[12];
-		b[uniq].music = parts[13];
-		b[uniq].attr = parts[14];
-*/
+	/*
+			b[uniq].name = parts[2];
+			b[uniq].owner = parts[3];
+			b[uniq].angleID = parts[4];
+			b[uniq].colorFxID = parts[5];
+			b[uniq].shapeFxID = parts[6];
+			b[uniq].colorID = parts[7];
+			b[uniq].dataBlock = parts[8];
+			b[uniq].position = parts[9];
+			b[uniq].rotation = parts[10];
+			b[uniq].print = parts[11];
+			b[uniq].light = parts[12];
+			b[uniq].music = parts[13];
+			b[uniq].attr = parts[14];
+	*/
+
+	// why is everything a baseplate?
+	//    needs to be sorted bottom to top first, also need to start sending %brick.isBaseplate from in-game as parts[15]
+	// why is the print always blank?
+	//    i'm setting everything to "1x1/vent" as it's printID 0 from in-game, i have to fix that at some point
+
 	for(let uniq in b) {
 		let brick = b[uniq];
 		let parts = [
