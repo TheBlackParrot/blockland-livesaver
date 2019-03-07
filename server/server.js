@@ -1,5 +1,6 @@
 const net = require("net");
 const fs = require("fs");
+const zlib = require("zlib");
 const settings = require("./settings.json");
 
 // https://stackoverflow.com/a/23013726
@@ -11,11 +12,42 @@ function swap(json){
 	return ret;
 }
 
+function compressFile(filename, keep = false) {
+	fs.readFile(filename, function(err, data) {
+		if(err) {
+			console.log(`${filename} doesn't exist, can't compress`);
+			return;
+		}
+
+		zlib.gzip(data, function(err, buffer) {
+			if(err) {
+				console.log("zlib error, can't compress");
+				return;
+			}
+
+			let out = fs.createWriteStream(`${filename}.gz`);
+			out.write(buffer);
+			out.end();
+
+			console.log(`compressed file ${filename}`);
+
+			if(!keep) {
+				fs.unlink(filename, function(err) {
+					if(err) {
+						console.log(`couldn't remove uncompressed file ${filename}`);
+					}
+				});
+			}
+		});
+	});
+}
+
 var bricks = {};
 var colors = {};
 var currentColors = {};
 var colorTranslations = {};
 var uiNameTranslations = {};
+var lastUpdate = {};
 
 if(!fs.existsSync("./logs")) {
 	fs.mkdirSync("./logs");
@@ -77,6 +109,11 @@ var funcs = {
 
 		if(!uiNameTranslations.hasOwnProperty(socket.BLPort)) {
 			uiNameTranslations[socket.BLPort] = {};
+			log(socket, `created ui name translation table`);
+		}
+
+		if(!lastUpdate.hasOwnProperty(socket.BLPort)) {
+			lastUpdate[socket.BLPort] = -1;
 			log(socket, `created ui name translation table`);
 		}
 
@@ -500,6 +537,28 @@ function exportBLS(socket) {
 }
 
 function exportBLLS(socket, fnadd = "") {
+	if(settings.saving.compressOld) {
+		fs.readdir("./saves", function(err, files) {
+			files.filter(function(file) {
+				let fparts = file.split("-");
+
+				let ext = fparts[1].substring(fparts[1].indexOf(".") + 1);
+				if(ext != "blls") {
+					return false;
+				}
+
+				let timestamp = parseInt(fparts[0]);
+				let port = parseInt(fparts[1]);
+
+				if(port != socket.BLPort) {
+					return false;
+				}
+
+				compressFile(`./saves/${file}`);
+			});
+		});
+	}
+
 	let c = currentColors[socket.BLPort];
 	let b = bricks[socket.BLPort];
 	let fn = `./saves/${Date.now()}-${socket.BLPort}${(fnadd == "" ? "" : `-${fnadd}`)}.blls`;
@@ -671,10 +730,15 @@ function loadBLLS(socket, file) {
 function saveOnAllSockets() {
 	for(let idx in TCPClients) {
 		let socket = TCPClients[idx];
+		if(Date.now() - lastUpdate[socket.BLPort] > settings.saving.interval*60*1000) {
+			log(socket, `skipping saving, last change more than ${settings.saving.interval} minute${settings.saving.interval > 1 ? "s" : ""} ago`);
+			continue;
+		}
+
 		exportBLLS(socket);
 	}
 }
-setInterval(saveOnAllSockets, settings.saveInterval*60*1000);
+setInterval(saveOnAllSockets, settings.saving.interval*60*1000);
 
 function handle(socket, parts) {
 	if(!parts.length) {
@@ -704,6 +768,13 @@ function handle(socket, parts) {
 			}, 1000);
 		} else {
 			let out = funcs[cmd](socket, parts);
+
+			try {
+				lastUpdate[socket.BLPort] = Date.now();
+			} catch(e) {
+				// do nothing
+			}
+
 			if(out) {
 				send(out);
 			}

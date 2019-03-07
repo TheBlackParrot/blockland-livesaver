@@ -3,6 +3,12 @@
 		"port": 27998
 	},
 
-	"saveInterval": 30,
-	"devMode": true
+	"devMode": true,
+
+	"saving": {
+		"interval": 30,
+		"compressOld": true,
+		"maxToKeep": 100,
+		"skipIfNoChange": true
+	}
 }
